@@ -539,7 +539,20 @@ Parsec {
         })
         
     }
-    
+
+    public static var
+    sourceIndex: GenericParser<StreamType, UserState, SourceIndex> {
+
+        return GenericParser<StreamType, UserState, SourceIndex>(parse:
+        { state in
+
+            return .none(.ok(state.index, state,
+                             ParseError.unknownParseError(state.position)))
+
+        })
+
+    }
+
     /// Return a parser that applies the result of the supplied parsers to the
     /// lifted function. The parsers are applied from left to right.
     ///
@@ -774,9 +787,11 @@ Parsec {
     ) -> Either<ParseError, Result> {
         
         let position = SourcePosition(name: sourceName, line: 1, column: 1)
+        let index = SourceIndex(name: sourceName, index: 0)
         let state = ParserState(
             input: input.makeIterator(),
             position: position,
+            index: index,
             userState: userState
         )
         
@@ -850,6 +865,9 @@ public extension Parsec {
         nextPosition: @escaping (
             SourcePosition, StreamType.Iterator.Element
         ) -> SourcePosition,
+        nextIndex: @escaping (
+            SourceIndex, StreamType.Iterator.Element
+        ) -> SourceIndex,
         match: @escaping (StreamType.Iterator.Element) -> Result?
     ) -> GenericParser<StreamType, UserState, Result> {
         
@@ -857,7 +875,8 @@ public extension Parsec {
             
             var input = state.input
             let position = state.position
-            
+            let index = state.index
+
             guard let tok = input.next() else {
                 
                 let error =
@@ -877,9 +896,12 @@ public extension Parsec {
             }
             
             let newPosition = nextPosition(position, tok)
+            let newIndex = nextIndex(index, tok)
+
             let newState = ParserState(
                 input: input,
                 position: newPosition,
+                index: newIndex,
                 userState: state.userState
             )
             let unknownError = ParseError.unknownParseError(newPosition)
@@ -914,13 +936,17 @@ where StreamType.Iterator.Element: Equatable {
         nextPosition: @escaping (
             SourcePosition, StreamType
         ) -> SourcePosition,
+        nextIndex: @escaping (
+            SourceIndex, StreamType
+        ) -> SourceIndex,
         tokens: StreamType
     ) -> GenericParser<StreamType, UserState, StreamType> {
         
         return GenericParser(parse: { state in
             
             let position = state.position
-            
+            let index = state.index
+
             var tokensIterator = tokens.makeIterator()
             var token = tokensIterator.next()
             
@@ -977,9 +1003,12 @@ where StreamType.Iterator.Element: Equatable {
             } while token != nil
             
             let newPosition = nextPosition(position, tokens)
+            let newIndex = nextIndex(index, tokens)
+
             let newState = ParserState(
                 input: input,
                 position: newPosition,
+                index: newIndex,
                 userState: state.userState
             )
             let error = ParseError.unknownParseError(newPosition)
@@ -1111,6 +1140,9 @@ struct ParserState<StreamTypeIterator, UserState> {
     /// The position in the input StreamType.
     var position: SourcePosition
     
+    /// The position in the input StreamType.
+    var index: SourceIndex
+
     /// The supplied user state.
     var userState: UserState
     

@@ -97,3 +97,44 @@ public func <(leftPos: SourcePosition, rightPos: SourcePosition) -> Bool {
     return false
     
 }
+
+public struct SourceIndex: Comparable, CustomStringConvertible {
+    /// The name of the source (i.e. file name)
+    public var name: String
+
+    /// The line number in the source.
+    public var index: Int
+
+    /// A textual representation of `self`.
+    public var description: String {
+        var desc = "(index: \(index))"
+        return desc
+
+    }
+
+    /// Update a source position given a character. If the character is a
+    /// newline ("\n") or carriage return ("\r") the line number is incremented
+    /// by 1. If the character is a tab ("\t") the column number is incremented
+    /// to the nearest 8'th column, ie. `column + 8 - ((column - 1) % 8)`. In
+    /// all other cases, the column is incremented by 1.
+    ///
+    /// - parameter char: The tested character indicating how to update the
+    ///   position.
+    mutating func updateIndex(_ char: Character) {
+        index += 1
+    }
+}
+
+//==============================================================================
+// Operator implementations for the `SourceIndex` type.
+
+/// Equality based on the line and column number.
+public func ==(leftPos: SourceIndex, rightPos: SourceIndex) -> Bool {
+    leftPos.index == rightPos.index
+}
+
+/// Comparison based on the line and column number.
+public func <(leftPos: SourceIndex, rightPos: SourceIndex) -> Bool {
+    leftPos.index < rightPos.index ? true : false
+}
+

@@ -493,6 +493,7 @@ public extension Parsec where StreamType.Iterator.Element == Result {
         return GenericParser.tokenPrimitive(
             tokenDescription: { String(reflecting: $0) },
             nextPosition: { pos, _ in pos },
+            nextIndex: { idx, _ in idx },
             match: { $0 })
         
     }

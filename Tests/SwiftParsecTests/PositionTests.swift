@@ -53,7 +53,36 @@ class PositionTests: XCTestCase {
         }
         
     }
-    
+
+    func testColumnIndex() {
+
+        let str = "1234"
+        let expectedIndex = str.count
+
+        let strParser = StringParser.string(str)
+        let positionParser = strParser *>
+            GenericParser<String, (), SourcePosition>.sourceIndex
+
+        let errorMessage = "GenericParser.sourcePosition should return " +
+            "column value equal to \"\(expectedIndex)\"."
+
+        testStringParserSuccess(positionParser, inputs: [str])
+        { input, result in
+
+            XCTAssertEqual(
+                expectedIndex,
+                result.index,
+                self.formatErrorMessage(
+                    errorMessage,
+                    input: input,
+                    result: result
+                )
+            )
+
+        }
+
+    }
+
     func testLineColumnPosition() {
         
         let str = "1\n2\n3"
@@ -86,7 +115,7 @@ class PositionTests: XCTestCase {
         }
         
     }
-    
+
     func testTabPosition() {
         
         let str = "1\t3"

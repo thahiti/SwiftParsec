@@ -37,6 +37,14 @@ where StreamType.Iterator.Element == Character, Result == Character {
                 return pos
                 
             },
+            nextIndex: { position, elem in
+
+                var pos = position
+                pos.updateIndex(elem)
+
+                return pos
+
+            },
             match: { elem in
                 
                 predicate(elem) ? elem : nil
@@ -332,6 +340,18 @@ where StreamType.Iterator.Element == Character {
                 
                 return pos
                 
+            },
+            nextIndex: { index, charStreamType in
+
+                var idx = index
+                for char in charStreamType {
+
+                    idx.updateIndex(char)
+
+                }
+
+                return idx
+
             },
             tokens: str)
         
